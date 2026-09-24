@@ -1,0 +1,195 @@
+/* ===== Variables de base ===== */
+:root {
+  --couleur-fond: #f7f7f5;
+  --couleur-texte: #1f1f1f;
+  --couleur-accent: #3009bc;
+  --couleur-coupure: #e32b16;
+  --couleur-retour: #06954d;
+  --couleur-bordure: #777772;
+  --rayon: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--couleur-fond);
+  color: var(--couleur-texte);
+  line-height: 1.5;
+}
+
+main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+/* ===== En-tête ===== */
+.site-header {
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: center;
+}
+
+.site-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 3.75rem;
+}
+
+.site-header p {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+}
+
+.tagline {
+  margin: 0;
+  color: #555;
+}
+
+/* ===== Sections ===== */
+section {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon);
+}
+
+section h2 {
+  margin-top: 0;
+  font-size: 2.1rem;
+}
+
+/* ===== Formulaire ===== */
+.champ {
+  margin-bottom: 1rem;
+}
+
+.champ label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.champ select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--couleur-bordure);
+  border-radius: var(--rayon);
+  font-size: 1.2rem;
+}
+
+button[type="submit"] {
+  padding: 0.6rem 1.2rem;
+  background: var(--couleur-accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--rayon);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  opacity: 0.9;
+}
+
+/* ===== Compteur ===== */
+#compteur-section {
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+#compteur-valeur {
+  font-weight: 700;
+}
+
+/* ===== Carte ===== */
+#carte {
+  height: 950px;
+  border-radius: var(--rayon);
+}
+
+.etiquette-quartier {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f1f1f;
+  background: #fff;
+  border: 1px solid var(--couleur-bordure);
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Liste des quartiers ===== */
+#liste-quartiers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#liste-quartiers li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.6rem 0;
+  border-bottom: 1px solid var(--couleur-bordure);
+}
+
+#liste-quartiers li:last-child {
+  border-bottom: none;
+}
+
+.pastille {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.pastille.coupure {
+  background: var(--couleur-coupure);
+}
+
+.pastille.retour {
+  background: var(--couleur-retour);
+}
+
+.pastille.inconnu {
+  background: #aaa;
+}
+
+.heure-signalement {
+  color: #777;
+  font-size: 1.2rem;
+}
+
+.badge-fraicheur {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+ 
+.badge-fraicheur.frais {
+  background: #e3f3ea;
+  color: #0aa256;
+}
+ 
+.badge-fraicheur.perime {
+  background: #fbeae7;
+  color: #d12207;
+}
+
+/* ===== Pied de page ===== */
+.site-footer {
+  text-align: center;
+  color: #999;
+  font-size: 1.85rem;
+  padding: 1.5rem;
+}

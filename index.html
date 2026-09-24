@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Courant Alert — État du courant par quartier</title>
+
+  <!-- Leaflet : bibliothèque de cartographie, chargée depuis un CDN public -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <link rel="stylesheet" href="Style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>Courant Alert</h1>
+    <p class="tagline">Signalez et consultez l'état du courant, quartier par quartier.</p>
+  </header>
+
+  <main>
+
+    <!-- ===== Formulaire de signalement ===== -->
+    <section id="formulaire-section" aria-labelledby="titre-formulaire">
+      <h2 id="titre-formulaire">Signaler un état</h2>
+      <form id="formulaire-signalement">
+        <div class="champ">
+          <label for="quartier">Quartier</label>
+          <select id="quartier" name="quartier" required>
+            <option value="" disabled selected>Choisir un quartier</option>
+            <!-- Les options sont ajoutées automatiquement par script.js à partir de data.js -->
+          </select>
+        </div>
+
+        <div class="champ">
+          <label for="statut">État du courant</label>
+          <select id="statut" name="statut" required>
+            <option value="" disabled selected>Choisir un état</option>
+            <option value="coupure">Coupure</option>
+            <option value="retour">Retour du courant</option>
+          </select>
+        </div>
+
+        <button type="submit">Envoyer le signalement</button>
+      </form>
+    </section>
+
+    <!-- ===== Compteur global ===== -->
+    <section id="compteur-section">
+      <p>Signalements reçus : <span id="compteur-valeur">0</span></p>
+    </section>
+
+    <!-- ===== Carte interactive ===== -->
+    <section id="carte-section" aria-labelledby="titre-carte">
+      <h2 id="titre-carte">Carte des quartiers</h2>
+      <div id="carte"></div>
+    </section>
+
+    <!-- ===== Liste des quartiers ===== -->
+    <section id="liste-section" aria-labelledby="titre-liste">
+      <h2 id="titre-liste">État par quartier</h2>
+      <ul id="liste-quartiers">
+        <!-- Rempli automatiquement par script.js -->
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <hr /> Projet pédagogique — Akieni Academy
+  </footer>
+
+  <!-- Leaflet JS, chargé avant notre propre script -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="Data.js"></script>
+  <script src="Script.js"></script>
+</body>
+</html>
