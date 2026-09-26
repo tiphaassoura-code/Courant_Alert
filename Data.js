@@ -10,9 +10,9 @@
  */
 
 const QUARTIERS_INITIAUX = [
-  { nom: "Bacongo",   lat: -4.295585, lng: 15.245811 },
-  { nom: "Batignolles", lat: -4.259311 , lng: 15.258978 },
-  { nom: "Plateaux",  lat: -4.275187 , lng: 15.287143 }
+  { nom: "Bacongo",   lat: -4.2932, lng: 15.2579 },
+  { nom: "Batignolles", lat: -4.2751, lng: 15.2589 },
+  { nom: "Plateaux",  lat:  -4.2634, lng: 15.2832 }
 ];
 
 // Coordonnées approximatives du centre de Brazzaville, pour centrer la carte

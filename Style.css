@@ -48,7 +48,27 @@ main {
   color: #555;
 }
 
-/* ===== Sections ===== */
+.champ-recherche {
+  position: relative;
+  width: 800px;
+  margin: 0 auto;
+}
+
+.champ-recherche i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.champ-recherche input {
+  width: 100%;
+  padding: 15px 15px 15px 50px;
+  box-sizing: border-box;
+  font-size: 20px;
+}
+
+/* Sections  */
 section {
   margin-top: 2rem;
   padding: 1.25rem;
@@ -63,29 +83,38 @@ section h2 {
 }
 
 /* ===== Formulaire ===== */
+.champ-ligne {
+  display: flex;
+  justify-content: space-between;
+}
+
 .champ {
+  display: block;
   margin-bottom: 1rem;
+  min-width: 300px;
 }
 
 .champ label {
   display: block;
-  margin-bottom: 0.35rem;
-  font-weight: 700;
+  margin-bottom: 10px;
+  font-weight: 750;
 }
 
 .champ select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--couleur-bordure);
+  padding: 5px;
+  border: 2px solid var(--couleur-bordure);
   border-radius: var(--rayon);
   font-size: 1.2rem;
 }
 
 button[type="submit"] {
+  display: block;
+  margin: 1rem auto 0;
   padding: 0.6rem 1.2rem;
   background: var(--couleur-accent);
   color: #fff;
-  border: none;
+  border: center;
   border-radius: var(--rayon);
   font-size: 1rem;
   cursor: pointer;
@@ -184,6 +213,27 @@ button[type="submit"]:hover {
 .badge-fraicheur.perime {
   background: #fbeae7;
   color: #d12207;
+}
+
+#confirmation-envoi {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--couleur-accent);
+  color: #fff;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--rayon);
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#confirmation-envoi.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* ===== Pied de page ===== */

@@ -19,6 +19,8 @@ const DELAI_FRAICHEUR_MS = 2 * 60 * 60 * 1000;
 // Structure : { "Bacongo": { lat, lng, statut, heure }, ... }
 let donneesQuartiers = {};
 
+let detailsOuverts = {};
+
 // Compteur global de signalements (nombre total reçu depuis le debut)
 let nombreSignalements = 0;
 
@@ -29,10 +31,7 @@ let carte;
 // sans avoir à recreer toute la carte à chaque signalement.
 let marqueurs = {};
 
-
-/* =====================================================
-   1. CHARGEMENT DES DONNEES
-   ===================================================== */
+/*1. CHARGEMENT DES DONNEES*/
 
 function chargerDonnees() {
   const donneesEnregistrees = localStorage.getItem(CLE_STOCKAGE);
@@ -42,6 +41,11 @@ function chargerDonnees() {
     const parsed = JSON.parse(donneesEnregistrees);
     donneesQuartiers = parsed.quartiers;
     nombreSignalements = parsed.compteur;
+    Object.keys(donneesQuartiers).forEach((nomQuartier) => {
+  if (!donneesQuartiers[nomQuartier].historique) {
+    donneesQuartiers[nomQuartier].historique = [];
+  }
+  });
   } else {
     // Premiere visite : on part de la liste initiale (data.js),
     // chaque quartier commence avec un statut "inconnu".
@@ -51,11 +55,29 @@ function chargerDonnees() {
         lng: quartier.lng,
         statut: "inconnu",
         heure: null,
-        nombreSignalements: 0
+        nombreSignalements: 0,
+        historique: []
       };
     });
     nombreSignalements = 0;
   }
+}
+
+function compterContradictions(historique) {
+  const SEUIL_MS = 5 * 60 * 1000; // 5 minutes, en millisecondes
+  let compte = 0;
+
+  for (let i = 1; i < historique.length; i++) {
+    const precedent = historique[i - 1];
+    const actuel = historique[i];
+    const ecartMs = new Date(actuel.heure) - new Date(precedent.heure);
+
+    if (actuel.statut !== precedent.statut && ecartMs < SEUIL_MS) {
+      compte++;
+    }
+  }
+
+  return compte;
 }
 
 function sauvegarderDonnees() {
@@ -66,10 +88,7 @@ function sauvegarderDonnees() {
   localStorage.setItem(CLE_STOCKAGE, JSON.stringify(aEnregistrer));
 }
 
-
-/* =====================================================
-   2. FORMULAIRE
-   ===================================================== */
+/*2. FORMULAIRE */
 
 function remplirListeDeroulanteQuartiers() {
   const select = document.getElementById("quartier");
@@ -95,7 +114,8 @@ function initialiserFormulaire() {
     enregistrerSignalement(quartierChoisi, statutChoisi);
 
     // On réinitialise le formulaire pour le prochain signalement
-    formulaire.reset();
+    document.getElementById("quartier").value = "";
+    document.getElementById("statut").value = "";
   });
 }
 
@@ -104,14 +124,18 @@ function enregistrerSignalement(nomQuartier, statut) {
 
   donneesQuartiers[nomQuartier].statut = statut;
   donneesQuartiers[nomQuartier].heure = maintenant.toISOString();
+  if (!donneesQuartiers[nomQuartier].historique) {
+    donneesQuartiers[nomQuartier].historique = [];
+  }
+    donneesQuartiers[nomQuartier].historique.push({
+      statut: statut,
+      heure: maintenant.toISOString()
+  });
+
   donneesQuartiers[nomQuartier].nombreSignalements =
     (donneesQuartiers[nomQuartier].nombreSignalements || 0) + 1;
 
- // Le compteur global recommence à 0 après le 10e signalement.
-  // L'opérateur % (modulo) donne le reste d'une division : pour n'importe
-  // quel nombre entre 0 et 9, (n + 1) % 10 = n + 1, mais à 9, (9 + 1) % 10
-  // donne 0, ce qui fait "boucler" le compteur au lieu de continuer à 10.
-  nombreSignalements = (nombreSignalements + 1) % 10;
+  nombreSignalements = (nombreSignalements + 1) % 11;
 
   sauvegarderDonnees();
 
@@ -119,28 +143,47 @@ function enregistrerSignalement(nomQuartier, statut) {
   afficherCompteur();
   afficherListeQuartiers();
   mettreAJourMarqueur(nomQuartier);
+  afficherConfirmationEnvoi();
 }
 
+function afficherConfirmationEnvoi() {
+  const confirmation = document.getElementById("confirmation-envoi");
+  confirmation.textContent = "Signalement envoyé !";
+  confirmation.classList.add("visible");
 
-/* =====================================================
-   3. COMPTEUR
-   ===================================================== */
+  setTimeout(() => {
+    confirmation.classList.remove("visible");
+  }, 2500);
+}
 
+/*3. COMPTEUR */
 function afficherCompteur() {
   document.getElementById("compteur-valeur").textContent = nombreSignalements;
 }
 
-
-/* =====================================================
-   4. LISTE DES QUARTIERS
-   ===================================================== */
-
+/* 4. LISTE DES QUARTIERS */
 function formaterHeure(heureISO) {
   if (!heureISO) {
     return "Aucun signalement pour l'instant";
   }
   const date = new Date(heureISO);
-  return "Mis à jour à " + date.toLocaleTimeString("fr-FR", {
+
+  const dateAffichee= date.toLocaleDateString ("fr-FR", {
+    jour: "numeric",
+    mois: "long",
+    annee: "numeric"
+  });
+
+  const heureAffichee= date.toLocaleTimeString ("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  return `Mis à jour le` + " " + date.toLocaleDateString ("fr-FR", {
+    jour: "numeric",
+    mois: "long",
+    annee: "numeric"
+  }) + " " + `à` + " " + date.toLocaleTimeString ("fr-FR", {
     hour: "2-digit",
     minute: "2-digit"
   });
@@ -182,6 +225,9 @@ function afficherListeQuartiers() {
 
   Object.keys(donneesQuartiers).forEach((nomQuartier) => {
     const infos = donneesQuartiers[nomQuartier];
+    const historique = infos.historique || [];
+    const contradictions = compterContradictions(historique);
+    const estOuvert = !!detailsOuverts[nomQuartier];
 
     const element = document.createElement("li");
     element.innerHTML = `
@@ -193,17 +239,43 @@ function afficherListeQuartiers() {
       <span class="heure-signalement">
         ${infos.nombreSignalements || 0} signalement(s) — ${formaterHeure(infos.heure)}
       </span>
+      <div>
+        <span>${contradictions} signalement(s) contradictoire(s)</span>
+        <button type="button" class="bouton-details" data-quartier="${nomQuartier}">
+          ${estOuvert ? "Masquer" : "Détails"}
+        </button>
+      </div>
+      ${estOuvert ? construireDetailsHistorique(historique) : ""}
     `;
 
     liste.appendChild(element);
   });
+  document.querySelectorAll(".bouton-details").forEach((bouton) => {
+    bouton.addEventListener("click", () => {
+      const nomQuartier = bouton.dataset.quartier;
+      detailsOuverts[nomQuartier] = !detailsOuverts[nomQuartier];
+      afficherListeQuartiers();
+    });
+  });
 }
 
+function construireDetailsHistorique(historique) {
+  if (historique.length === 0) {
+    return `<p>Aucun historique pour l'instant.</p>`;
+  }
 
-/* =====================================================
-   5. CARTE INTERACTIVE (Leaflet)
-   ===================================================== */
+  const lignes = [...historique]
+    .reverse()
+    .map((entree) => {
+      const libelle = entree.statut === "coupure" ? "Coupure" : "Retour du courant";
+      return `<li>${libelle} — ${formaterHeure(entree.heure)}</li>`;
+    })
+    .join("");
 
+  return `<ul>${lignes}</ul>`;
+}
+
+/*5. CARTE INTERACTIVE (Leaflet) */
 function couleurStatut(statut) {
   if (statut === "coupure") return "#c0392b";
   if (statut === "retour") return "#2f6f4f";
@@ -231,7 +303,7 @@ function initialiserCarte() {
     14
   );
 
-    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
     attribution: "© Esri, © OpenStreetMap contributors"
   }).addTo(carte);
 
@@ -276,10 +348,7 @@ function mettreAJourMarqueur(nomQuartier) {
 }
 
 
-/* =====================================================
-   6. DÉMARRAGE DE L'APPLICATION
-   ===================================================== */
-
+/* 6. DÉMARRAGE DE L'APPLICATION */
 function demarrerApplication() {
   chargerDonnees();
   remplirListeDeroulanteQuartiers();

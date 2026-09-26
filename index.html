@@ -3,18 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Courant Alert — État du courant par quartier</title>
+  <title>YADU — État du courant par quartier</title>
 
   <!-- Leaflet : bibliothèque de cartographie, chargée depuis un CDN public -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
   <link rel="stylesheet" href="Style.css" />
 </head>
 <body>
 
   <header class="site-header">
-    <h1>Courant Alert</h1>
+    <h1>YADU</h1>
     <p class="tagline">Signalez et consultez l'état du courant, quartier par quartier.</p>
+
+    <div class="champ-recherche">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="text" placeholder="Rechercher un quartier">
+    </div>
   </header>
 
   <main>
@@ -23,21 +29,23 @@
     <section id="formulaire-section" aria-labelledby="titre-formulaire">
       <h2 id="titre-formulaire">Signaler un état</h2>
       <form id="formulaire-signalement">
-        <div class="champ">
-          <label for="quartier">Quartier</label>
-          <select id="quartier" name="quartier" required>
-            <option value="" disabled selected>Choisir un quartier</option>
-            <!-- Les options sont ajoutées automatiquement par script.js à partir de data.js -->
-          </select>
-        </div>
+        <div class="champ-ligne">
+          <div class="champ">
+            <label for="quartier">Quartier</label>
+            <select id="quartier" name="quartier" required autocomplete="off">
+              <option value="" disabled selected>Choisir un quartier</option>
+              <!-- Les options sont ajoutées automatiquement par script.js à partir de data.js -->
+            </select>
+          </div>
 
-        <div class="champ">
-          <label for="statut">État du courant</label>
-          <select id="statut" name="statut" required>
-            <option value="" disabled selected>Choisir un état</option>
-            <option value="coupure">Coupure</option>
-            <option value="retour">Retour du courant</option>
-          </select>
+          <div class="champ">
+            <label for="statut">État du courant</label>
+            <select id="statut" name="statut" required autocomplete="off">
+              <option value="" disabled selected>Choisir un état</option>
+              <option value="coupure">Coupure</option>
+              <option value="retour">Retour du courant</option>
+            </select>
+          </div>
         </div>
 
         <button type="submit">Envoyer le signalement</button>
@@ -49,12 +57,6 @@
       <p>Signalements reçus : <span id="compteur-valeur">0</span></p>
     </section>
 
-    <!-- ===== Carte interactive ===== -->
-    <section id="carte-section" aria-labelledby="titre-carte">
-      <h2 id="titre-carte">Carte des quartiers</h2>
-      <div id="carte"></div>
-    </section>
-
     <!-- ===== Liste des quartiers ===== -->
     <section id="liste-section" aria-labelledby="titre-liste">
       <h2 id="titre-liste">État par quartier</h2>
@@ -63,7 +65,15 @@
       </ul>
     </section>
 
+    <!-- ===== Carte interactive ===== -->
+    <section id="carte-section" aria-labelledby="titre-carte">
+      <h2 id="titre-carte">Carte des quartiers</h2>
+      <div id="carte"></div>
+    </section>
+
   </main>
+
+  <div id="Confirmation envoyé"></div>
 
   <footer class="site-footer">
     <hr /> Projet pédagogique — Akieni Academy
