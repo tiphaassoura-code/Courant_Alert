@@ -21,6 +21,8 @@ let donneesQuartiers = {};
 
 let detailsOuverts = {};
 
+let termeRecherche = "";
+
 // Compteur global de signalements (nombre total reçu depuis le debut)
 let nombreSignalements = 0;
 
@@ -61,6 +63,28 @@ function chargerDonnees() {
     });
     nombreSignalements = 0;
   }
+}
+
+function initialiserBarreLaterale() {
+  const bouton = document.getElementById("toggle-barre-laterale");
+  const barre = document.getElementById("barre-laterale");
+
+  bouton.addEventListener("click", () => {
+    const estOuvert = barre.classList.toggle("ouvert");
+    bouton.setAttribute("aria-expanded", estOuvert);
+    bouton.innerHTML = estOuvert
+      ? '<i class="fa-solid fa-chevron-left"></i>'
+      : '<i class="fa-solid fa-chevron-right"></i>';
+  });
+}
+
+function initialiserRecherche() {
+  const champRecherche = document.getElementById("recherche-quartier");
+
+  champRecherche.addEventListener("input", (evenement) => {
+    termeRecherche = evenement.target.value.toLowerCase();
+    afficherListeQuartiers();
+  });
 }
 
 function compterContradictions(historique) {
@@ -223,7 +247,11 @@ function afficherListeQuartiers() {
   const liste = document.getElementById("liste-quartiers");
   liste.innerHTML = ""; // On repart de zéro à chaque mise à jour
 
-  Object.keys(donneesQuartiers).forEach((nomQuartier) => {
+  const nomsAffiches = Object.keys(donneesQuartiers).filter((nomQuartier) =>
+    nomQuartier.toLowerCase().includes(termeRecherche)
+  );
+
+  nomsAffiches.forEach((nomQuartier) => {
     const infos = donneesQuartiers[nomQuartier];
     const historique = infos.historique || [];
     const contradictions = compterContradictions(historique);
@@ -239,7 +267,7 @@ function afficherListeQuartiers() {
       <span class="heure-signalement">
         ${infos.nombreSignalements || 0} signalement(s) — ${formaterHeure(infos.heure)}
       </span>
-      <div>
+      <div class="heure-signalement">
         <span>${contradictions} signalement(s) contradictoire(s)</span>
         <button type="button" class="bouton-details" data-quartier="${nomQuartier}">
           ${estOuvert ? "Masquer" : "Détails"}
@@ -261,7 +289,7 @@ function afficherListeQuartiers() {
 
 function construireDetailsHistorique(historique) {
   if (historique.length === 0) {
-    return `<p>Aucun historique pour l'instant.</p>`;
+    return `<p class="heure-signalement">Aucun historique pour l'instant.</p>`;
   }
 
   const lignes = [...historique]
@@ -272,7 +300,7 @@ function construireDetailsHistorique(historique) {
     })
     .join("");
 
-  return `<ul>${lignes}</ul>`;
+  return `<ul class="heure-signalement">${lignes}</ul>`;
 }
 
 /*5. CARTE INTERACTIVE (Leaflet) */
@@ -300,12 +328,17 @@ function creerIcone(statut) {
 function initialiserCarte() {
   carte = L.map("carte").setView(
     [CENTRE_BRAZZAVILLE.lat, CENTRE_BRAZZAVILLE.lng],
-    14
+    15
   );
 
-  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-    attribution: "© Esri, © OpenStreetMap contributors"
-  }).addTo(carte);
+  L.tileLayer(
+  "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_40d5_1_9764f609ddd1223d51f7683d",
+  {
+    attribution:
+      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attribution/">CARTO</a>',
+    maxZoom: 20
+  }
+).addTo(carte);
 
   // On crée un marqueur pour chaque quartier connu au chargement
   Object.keys(donneesQuartiers).forEach((nomQuartier) => {
@@ -351,6 +384,8 @@ function mettreAJourMarqueur(nomQuartier) {
 /* 6. DÉMARRAGE DE L'APPLICATION */
 function demarrerApplication() {
   chargerDonnees();
+  initialiserRecherche();
+  initialiserBarreLaterale();
   remplirListeDeroulanteQuartiers();
   initialiserFormulaire();
   afficherCompteur();
