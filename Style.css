@@ -323,6 +323,58 @@ button[type="submit"]:hover {
   transform: translateX(-50%) translateY(0);
 }
 
+/* ===== Responsive mobile ===== */
+@media (max-width: 600px) {
+
+  .site-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .champ-ligne {
+    flex-direction: column;
+  }
+
+  #barre-laterale {
+    width: 85vw;
+    min-width: 0;
+  }
+
+  #liste-quartiers li {
+    padding: 0.9rem 0;
+  }
+
+  .ligne-quartier {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .ligne-quartier-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .badge-fraicheur {
+    margin-left: 0;
+    margin-top: 4px;
+  }
+
+  .heure-signalement {
+    font-size: 0.8rem;
+  }
+
+  .onglets {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  #carte {
+    height: 300px;
+  }
+
+}
+
 /* ===== Pied de page ===== */
 .site-footer {
   text-align: center;
