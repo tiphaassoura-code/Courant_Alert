@@ -56,7 +56,8 @@ main {
 
 .champ-recherche {
   position: relative;
-  width: 800px;
+  width: 100%;
+  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -339,20 +340,11 @@ button[type="submit"]:hover {
     min-width: 0;
   }
 
+
   #liste-quartiers li {
-    padding: 0.9rem 0;
-  }
-
-  .ligne-quartier {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .ligne-quartier-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   }
 
   .badge-fraicheur {
