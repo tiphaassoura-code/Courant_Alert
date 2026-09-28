@@ -165,6 +165,7 @@ function enregistrerSignalement(nomQuartier, statut) {
 
   // On met à jour les trois affichages concernes
   afficherCompteur();
+  afficherStatsQuartiers();
   afficherListeQuartiers();
   mettreAJourMarqueur(nomQuartier);
   afficherConfirmationEnvoi();
@@ -185,7 +186,31 @@ function afficherCompteur() {
   document.getElementById("compteur-valeur").textContent = nombreSignalements;
 }
 
-/* 4. LISTE DES QUARTIERS */
+/*4. Status quartier*/
+function afficherStatsQuartiers() {
+  const liste = document.getElementById("stats-quartiers");
+  liste.innerHTML = "";
+
+  Object.keys(donneesQuartiers).forEach((nomQuartier) => {
+    const historique = donneesQuartiers[nomQuartier].historique || [];
+
+    const nbCoupures = historique.filter((entree) => entree.statut === "coupure").length;
+    const nbRetours = historique.filter((entree) => entree.statut === "retour").length;
+
+    const element = document.createElement("li");
+    element.innerHTML = `
+      <span>${nomQuartier}</span>
+      <span class="stats-valeurs">
+        <span class="stats-coupure">${nbCoupures} coupure(s)</span>
+        <span class="stats-retour">${nbRetours} retour(s)</span>
+      </span>
+    `;
+
+    liste.appendChild(element);
+  });
+}
+
+/* 5. LISTE DES QUARTIERS */
 function formaterHeure(heureISO) {
   if (!heureISO) {
     return "Aucun signalement pour l'instant";
@@ -303,7 +328,7 @@ function construireDetailsHistorique(historique) {
   return `<ul class="heure-signalement">${lignes}</ul>`;
 }
 
-/*5. CARTE INTERACTIVE (Leaflet) */
+/*6. CARTE INTERACTIVE (Leaflet) */
 function couleurStatut(statut) {
   if (statut === "coupure") return "#c0392b";
   if (statut === "retour") return "#2f6f4f";
@@ -381,7 +406,7 @@ function mettreAJourMarqueur(nomQuartier) {
 }
 
 
-/* 6. DÉMARRAGE DE L'APPLICATION */
+/* 7. DÉMARRAGE DE L'APPLICATION */
 function demarrerApplication() {
   chargerDonnees();
   initialiserRecherche();
@@ -389,6 +414,7 @@ function demarrerApplication() {
   remplirListeDeroulanteQuartiers();
   initialiserFormulaire();
   afficherCompteur();
+  afficherStatsQuartiers();
   afficherListeQuartiers();
   initialiserCarte();
 }
