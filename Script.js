@@ -44,10 +44,10 @@ function chargerDonnees() {
     donneesQuartiers = parsed.quartiers;
     nombreSignalements = parsed.compteur;
     Object.keys(donneesQuartiers).forEach((nomQuartier) => {
-  if (!donneesQuartiers[nomQuartier].historique) {
-    donneesQuartiers[nomQuartier].historique = [];
-  }
-  });
+      if (!donneesQuartiers[nomQuartier].historique) {
+        donneesQuartiers[nomQuartier].historique = [];
+      }
+    });
   } else {
     // Premiere visite : on part de la liste initiale (data.js),
     // chaque quartier commence avec un statut "inconnu".
@@ -65,25 +65,76 @@ function chargerDonnees() {
   }
 }
 
-function initialiserBarreLaterale() {
-  const bouton = document.getElementById("toggle-barre-laterale");
-  const barre = document.getElementById("barre-laterale");
+// (Barre latérale supprimée — contenu intégré dans le layout principal)
 
-  bouton.addEventListener("click", () => {
-    const estOuvert = barre.classList.toggle("ouvert");
-    bouton.setAttribute("aria-expanded", estOuvert);
-    bouton.innerHTML = estOuvert
-      ? '<i class="fa-solid fa-chevron-left"></i>'
-      : '<i class="fa-solid fa-chevron-right"></i>';
-  });
-}
 
 function initialiserRecherche() {
   const champRecherche = document.getElementById("recherche-quartier");
 
   champRecherche.addEventListener("input", (evenement) => {
-    termeRecherche = evenement.target.value.toLowerCase();
+    termeRecherche = normaliserTexte(evenement.target.value.trim());
+
+    const ongletQuartiers = document.getElementById("onglet-quartiers");
+    if (termeRecherche && ongletQuartiers.getAttribute("aria-selected") !== "true") {
+      ongletQuartiers.click();
+    }
+
     afficherListeQuartiers();
+  });
+}
+
+function normaliserTexte(texte) {
+  return texte
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("fr-FR");
+}
+
+function initialiserNavigationVues() {
+  const onglets = [...document.querySelectorAll('[role="tab"]')];
+  const vues = [...document.querySelectorAll('[role="tabpanel"]')];
+
+  function activerVue(ongletActif, donnerFocus = false) {
+    onglets.forEach((onglet) => {
+      const estActif = onglet === ongletActif;
+      onglet.setAttribute("aria-selected", String(estActif));
+      onglet.tabIndex = estActif ? 0 : -1;
+    });
+
+    vues.forEach((vue) => {
+      const estActive = vue.id === ongletActif.getAttribute("aria-controls");
+      vue.hidden = !estActive;
+      vue.classList.toggle("active", estActive);
+    });
+
+    if (donnerFocus) {
+      ongletActif.focus();
+    }
+
+    if (ongletActif.id === "onglet-signalement" && carte) {
+      requestAnimationFrame(() => carte.invalidateSize());
+    }
+  }
+
+  onglets.forEach((onglet, index) => {
+    onglet.addEventListener("click", () => activerVue(onglet));
+    onglet.addEventListener("keydown", (evenement) => {
+      let prochainIndex;
+      if (evenement.key === "ArrowRight") {
+        prochainIndex = (index + 1) % onglets.length;
+      } else if (evenement.key === "ArrowLeft") {
+        prochainIndex = (index - 1 + onglets.length) % onglets.length;
+      } else if (evenement.key === "Home") {
+        prochainIndex = 0;
+      } else if (evenement.key === "End") {
+        prochainIndex = onglets.length - 1;
+      } else {
+        return;
+      }
+
+      evenement.preventDefault();
+      activerVue(onglets[prochainIndex], true);
+    });
   });
 }
 
@@ -151,15 +202,15 @@ function enregistrerSignalement(nomQuartier, statut) {
   if (!donneesQuartiers[nomQuartier].historique) {
     donneesQuartiers[nomQuartier].historique = [];
   }
-    donneesQuartiers[nomQuartier].historique.push({
-      statut: statut,
-      heure: maintenant.toISOString()
+  donneesQuartiers[nomQuartier].historique.push({
+    statut: statut,
+    heure: maintenant.toISOString()
   });
 
   donneesQuartiers[nomQuartier].nombreSignalements =
     (donneesQuartiers[nomQuartier].nombreSignalements || 0) + 1;
 
-  nombreSignalements = (nombreSignalements + 1) % 11;
+  nombreSignalements = nombreSignalements + 1;
 
   sauvegarderDonnees();
 
@@ -217,25 +268,18 @@ function formaterHeure(heureISO) {
   }
   const date = new Date(heureISO);
 
-  const dateAffichee= date.toLocaleDateString ("fr-FR", {
-    jour: "numeric",
-    mois: "long",
-    annee: "numeric"
+  const dateAffichee = date.toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
   });
 
-  const heureAffichee= date.toLocaleTimeString ("fr-FR", {
+  const heureAffichee = date.toLocaleTimeString("fr-FR", {
     hour: "2-digit",
     minute: "2-digit"
   });
 
-  return `Mis à jour le` + " " + date.toLocaleDateString ("fr-FR", {
-    jour: "numeric",
-    mois: "long",
-    annee: "numeric"
-  }) + " " + `à` + " " + date.toLocaleTimeString ("fr-FR", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  return `Mis à jour le ${dateAffichee} à ${heureAffichee}`;
 }
 
 function estStatutFrais(heureISO) {
@@ -244,27 +288,27 @@ function estStatutFrais(heureISO) {
   if (!heureISO) {
     return false;
   }
- 
+
   const heureDuSignalement = new Date(heureISO);
   const maintenant = new Date();
- 
+
   // La soustraction de deux objets Date donne directement un nombre de
   // millisecondes écoulées entre les deux — pas besoin de calcul manuel.
   const ecouleMs = maintenant - heureDuSignalement;
- 
+
   return ecouleMs < DELAI_FRAICHEUR_MS;
 }
- 
+
 function badgeFraicheur(heureISO) {
   // Pas de badge du tout si le quartier n'a jamais été signalé
   if (!heureISO) {
     return "";
   }
- 
+
   if (estStatutFrais(heureISO)) {
     return `<span class="badge-fraicheur frais">Récent</span>`;
   }
- 
+
   return `<span class="badge-fraicheur perime">Plus de 2h</span>`;
 }
 
@@ -273,8 +317,22 @@ function afficherListeQuartiers() {
   liste.innerHTML = ""; // On repart de zéro à chaque mise à jour
 
   const nomsAffiches = Object.keys(donneesQuartiers).filter((nomQuartier) =>
-    nomQuartier.toLowerCase().includes(termeRecherche)
+    normaliserTexte(nomQuartier).includes(termeRecherche)
   );
+
+  // Message si aucun quartier ne correspond à la recherche
+  if (nomsAffiches.length === 0 && termeRecherche.length > 0) {
+    const messageVide = document.createElement("li");
+    messageVide.className = "message-vide";
+    const icone = document.createElement("i");
+    icone.className = "fa-solid fa-magnifying-glass";
+    icone.setAttribute("aria-hidden", "true");
+    const texte = document.createElement("span");
+    texte.textContent = `Aucun quartier trouvé pour « ${document.getElementById("recherche-quartier").value.trim()} »`;
+    messageVide.append(icone, texte);
+    liste.appendChild(messageVide);
+    return;
+  }
 
   nomsAffiches.forEach((nomQuartier) => {
     const infos = donneesQuartiers[nomQuartier];
@@ -357,13 +415,13 @@ function initialiserCarte() {
   );
 
   L.tileLayer(
-  "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_40d5_1_9764f609ddd1223d51f7683d",
-  {
-    attribution:
-      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attribution/">CARTO</a>',
-    maxZoom: 20
-  }
-).addTo(carte);
+    "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_40d5_1_9764f609ddd1223d51f7683d",
+    {
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attribution/">CARTO</a>',
+      maxZoom: 20
+    }
+  ).addTo(carte);
 
   // On crée un marqueur pour chaque quartier connu au chargement
   Object.keys(donneesQuartiers).forEach((nomQuartier) => {
@@ -375,7 +433,7 @@ function initialiserCarte() {
       .addTo(carte)
       .bindPopup(construirePopup(nomQuartier, infos))
 
-       // bindTooltip avec permanent:true affiche le nom du quartier en
+      // bindTooltip avec permanent:true affiche le nom du quartier en
       // permanence à côté du marqueur, sans avoir besoin de cliquer dessus.
       .bindTooltip(nomQuartier, {
         permanent: true,
@@ -391,8 +449,8 @@ function initialiserCarte() {
 function construirePopup(nomQuartier, infos) {
   const libelleStatut =
     infos.statut === "coupure" ? "Coupure" :
-    infos.statut === "retour" ? "Retour du courant" :
-    "Statut inconnu";
+      infos.statut === "retour" ? "Retour du courant" :
+        "Statut inconnu";
 
   return `<b>${nomQuartier}</b><br>${libelleStatut}<br>${formaterHeure(infos.heure)}`;
 }
@@ -409,8 +467,8 @@ function mettreAJourMarqueur(nomQuartier) {
 /* 7. DÉMARRAGE DE L'APPLICATION */
 function demarrerApplication() {
   chargerDonnees();
+  initialiserNavigationVues();
   initialiserRecherche();
-  initialiserBarreLaterale();
   remplirListeDeroulanteQuartiers();
   initialiserFormulaire();
   afficherCompteur();

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <title>YADU — État du courant par quartier</title>
 
   <!-- Leaflet : bibliothèque de cartographie, chargée depuis un CDN public -->
@@ -12,6 +13,7 @@
 
   <link rel="stylesheet" href="Style.css" />
 </head>
+
 <body>
 
   <header class="site-header">
@@ -24,74 +26,79 @@
 
     <div class="champ-recherche">
       <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-      <input type="search" id="recherche-quartier" placeholder="Rechercher un quartier..." aria-label="Rechercher un quartier"/>
+      <input type="search" id="recherche-quartier" placeholder="Rechercher un quartier..."
+        aria-label="Rechercher un quartier" />
     </div>
   </header>
+  <nav class="navigation-vues" role="tablist" aria-label="Vues de l'application">
+    <button id="onglet-signalement" type="button" role="tab" aria-selected="true" aria-controls="vue-signalement" tabindex="0">
+      Signaler un état
+    </button>
+    
+    <button id="onglet-quartiers" type="button" role="tab" aria-selected="false" aria-controls="vue-quartiers" tabindex="-1">
+      État par quartier
+    </button>
+    <button id="onglet-stats" type="button" role="tab" aria-selected="false" aria-controls="vue-stats" tabindex="-1">
+      Coupures et retours par quartier
+    </button>
+  </nav>
 
-  
-  <button id="toggle-barre-laterale" aria-label="Afficher Signaler un état et Signalements reçus" aria-expanded="false">
-    <i class="fa-solid fa-chevron-right"></i>
-  </button>
-
-  <aside id="barre-laterale">
-
-    <!-- ===== Formulaire de signalement ===== -->
-    <section id="formulaire-section" aria-labelledby="titre-formulaire">
-      <h2 id="titre-formulaire">Signaler un état</h2>
-      <form id="formulaire-signalement">
-        <div class="champ-ligne">
-          <div class="champ">
-            <label for="quartier">Quartier</label>
-            <select id="quartier" name="quartier" required autocomplete="off">
-              <option value="" disabled selected>Choisir un quartier</option>
-              <!-- Les options sont ajoutées automatiquement par script.js à partir de data.js -->
-            </select>
+  <main>
+    <section id="vue-signalement" class="vue active" role="tabpanel" aria-labelledby="onglet-signalement">
+      <section id="formulaire-section" aria-labelledby="titre-formulaire">
+        <h2 id="titre-formulaire">Signaler un état</h2>
+        <form id="formulaire-signalement">
+          <div class="champ-ligne">
+            <div class="champ">
+              <label for="quartier">Quartier</label>
+              <select id="quartier" name="quartier" required autocomplete="off">
+                
+                <option value="" disabled selected>Choisir un quartier</option>
+                <!-- Les options sont ajoutées automatiquement par Script.js à partir de Data.js -->
+              </select>
+            </div>
+            
+            
+            <div class="champ">
+              <label for="statut">État du courant</label>
+              <select id="statut" name="statut" required autocomplete="off">
+                <option value="" disabled selected>Choisir un état</option>
+                <option value="coupure">Coupure</option>
+                <option value="retour">Retour du courant</option>
+              </select>
+            </div>
           </div>
 
-          <div class="champ">
-            <label for="statut">État du courant</label>
-            <select id="statut" name="statut" required autocomplete="off">
-              <option value="" disabled selected>Choisir un état</option>
-              <option value="coupure">Coupure</option>
-              <option value="retour">Retour du courant</option>
-            </select>
-          </div>
+          <button type="submit">Envoyer le signalement</button>
+        </form>
+        <div id="compteur-section">
+          Signalements reçus : <span id="compteur-valeur">0</span>
         </div>
+      </section>
 
-        <button type="submit">Envoyer le signalement</button>
-      </form>
+      <section id="carte-section" aria-labelledby="titre-carte">
+        <h2 id="titre-carte">Carte des quartiers</h2>
+        <div id="carte"></div>
+      </section>
     </section>
 
-    <!-- ===== Compteur global ===== -->
-    <section id="compteur-section">
-      <p>Signalements reçus : <span id="compteur-valeur">0</span></p>
+    <section id="vue-quartiers" class="vue" role="tabpanel" aria-labelledby="onglet-quartiers" hidden>
+      <section id="liste-section" aria-labelledby="titre-liste">
+        <h2 id="titre-liste">État par quartier</h2>
+        <ul id="liste-quartiers">
+          <!-- Rempli automatiquement par Script.js -->
+        </ul>
+      </section>
     </section>
 
-    <!-- ===== Nombre designalement par quartier ===== -->
-    <section id="stats-section" aria-labelledby="titre-stats">
-      <h2 id="titre-stats">Coupures et retours par quartier</h2>
-      <ul id="stats-quartiers">
-        <!-- Rempli automatiquement par script.js -->
-      </ul>
+    <section id="vue-stats" class="vue" role="tabpanel" aria-labelledby="onglet-stats" hidden>
+      <section id="stats-section" aria-labelledby="titre-stats">
+        <h2 id="titre-stats">Coupures et retours par quartier</h2>
+        <ul id="stats-quartiers">
+          <!-- Rempli automatiquement par Script.js -->
+        </ul>
+      </section>
     </section>
-
-  </aside>
-
-  <main> 
-    <!-- ===== Liste des quartiers ===== -->
-    <section id="liste-section" aria-labelledby="titre-liste">
-      <h2 id="titre-liste">État par quartier</h2>
-      <ul id="liste-quartiers">
-        <!-- Rempli automatiquement par script.js -->
-      </ul>
-    </section>
-
-    <!-- ===== Carte interactive ===== -->
-    <section id="carte-section" aria-labelledby="titre-carte">
-      <h2 id="titre-carte">Carte des quartiers</h2>
-      <div id="carte"></div>
-    </section>
-
   </main>
 
   <div id="confirmation-envoi"></div>
@@ -107,4 +114,5 @@
   <script src="Script.js"></script>
 
 </body>
+
 </html>
