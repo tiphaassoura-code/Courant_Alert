@@ -241,12 +241,12 @@ section h2 {
 .champ-ligne {
   display: flex;
   justify-content: space-between;
+  align-items: flex-end;
   gap: 1rem;
 }
 
 .champ {
   display: block;
-  margin-bottom: 1rem;
   min-width: 260px;
   flex: 1;
 }
@@ -287,7 +287,7 @@ section h2 {
 
 button[type="submit"] {
   display: block;
-  margin: 1rem auto 0;
+  margin: 0;
   padding: 0.7rem 2rem;
   background: var(--couleur-accent);
   color: #fff;

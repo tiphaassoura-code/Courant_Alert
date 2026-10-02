@@ -36,31 +36,39 @@ let marqueurs = {};
 /*1. CHARGEMENT DES DONNEES*/
 
 function chargerDonnees() {
+  // On commence toujours avec les 15 quartiers de Data.js.
+  QUARTIERS_INITIAUX.forEach((quartier) => {
+    donneesQuartiers[quartier.nom] = {
+      lat: quartier.lat,
+      lng: quartier.lng,
+      statut: "inconnu",
+      heure: null,
+      nombreSignalements: 0,
+      historique: []
+    };
+  });
+
   const donneesEnregistrees = localStorage.getItem(CLE_STOCKAGE);
 
   if (donneesEnregistrees) {
-    // Des donnees existent deja dans le navigateur : on les reutilise.
+    // Des données existent déjà dans le navigateur : on les réutilise.
     const parsed = JSON.parse(donneesEnregistrees);
-    donneesQuartiers = parsed.quartiers;
-    nombreSignalements = parsed.compteur;
-    Object.keys(donneesQuartiers).forEach((nomQuartier) => {
-      if (!donneesQuartiers[nomQuartier].historique) {
-        donneesQuartiers[nomQuartier].historique = [];
+
+    nombreSignalements = parsed.compteur || 0;
+
+    // On conserve les données déjà enregistrées
+    // pour les quartiers existants.
+    Object.keys(parsed.quartiers || {}).forEach((nomQuartier) => {
+      if (donneesQuartiers[nomQuartier]) {
+        donneesQuartiers[nomQuartier] = parsed.quartiers[nomQuartier];
+
+        if (!donneesQuartiers[nomQuartier].historique) {
+          donneesQuartiers[nomQuartier].historique = [];
+        }
       }
     });
   } else {
-    // Premiere visite : on part de la liste initiale (data.js),
-    // chaque quartier commence avec un statut "inconnu".
-    QUARTIERS_INITIAUX.forEach((quartier) => {
-      donneesQuartiers[quartier.nom] = {
-        lat: quartier.lat,
-        lng: quartier.lng,
-        statut: "inconnu",
-        heure: null,
-        nombreSignalements: 0,
-        historique: []
-      };
-    });
+    // Première visite : aucun signalement enregistré.
     nombreSignalements = 0;
   }
 }
@@ -214,7 +222,7 @@ function enregistrerSignalement(nomQuartier, statut) {
 
   sauvegarderDonnees();
 
-  // On met à jour les trois affichages concernes
+  // On met à jour les affichages concernes
   afficherCompteur();
   afficherStatsQuartiers();
   afficherListeQuartiers();
